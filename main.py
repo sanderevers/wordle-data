@@ -7,18 +7,18 @@ import json
 
 results = []
 users = []
-users_raw = []
 
 def main():
     dotenv.load_dotenv()
     slack_token = os.environ['SLACK_BOT_TOKEN']
+    channel_name = os.environ.get('CHANNEL_NAME','wordle')
 
     client = WebClient(token=slack_token)
 
     try:
         convos_resp = client.conversations_list(limit=1000)
-        wordles = [channel for channel in convos_resp['channels'] if channel['name']=='wordle']
-        channel_id = wordles[0]['id'] #C02U2975P1Q
+        wordles = [channel for channel in convos_resp['channels'] if channel['name']==channel_name]
+        channel_id = wordles[0]['id']
         client.conversations_join(channel=channel_id)
 
         for msg in iter(yield_messages(client,channel_id)):
