@@ -4,6 +4,7 @@ import re
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 import json
+from datetime import datetime
 
 results = []
 users = []
@@ -12,6 +13,10 @@ def main():
     dotenv.load_dotenv()
     slack_token = os.environ['SLACK_BOT_TOKEN']
     channel_name = os.environ.get('CHANNEL_NAME','wordle')
+    from_date = os.environ.get('FROM_DATE')
+    to_date = os.environ.get('TO_DATE')
+    from_ts = datetime.fromisoformat(from_date).timestamp() if from_date else None
+    to_ts = datetime.fromisoformat(to_date).timestamp() if to_date else None
 
     client = WebClient(token=slack_token)
 
@@ -21,7 +26,7 @@ def main():
         channel_id = wordles[0]['id']
         client.conversations_join(channel=channel_id)
 
-        for msg in iter(yield_messages(client,channel_id)):
+        for msg in iter(yield_messages(client,channel_id,from_ts,to_ts)):
             result = parse_msg(msg)
             if result:
                 results.append(result)
@@ -61,10 +66,10 @@ def parse_msg(message):
     else:
         print(f'Could not parse: {message}')
 
-def yield_messages(client,channel_id):
+def yield_messages(client,channel_id,from_ts,to_ts):
     cursor = None
     while True:
-        resp = client.conversations_history(channel=channel_id, cursor=cursor)
+        resp = client.conversations_history(channel=channel_id, cursor=cursor, oldest=from_ts, latest=to_ts)
         for msg in resp['messages']:
             yield msg
         try:

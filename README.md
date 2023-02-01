@@ -13,6 +13,7 @@ Assuming you have a `python3` environment available on your system.
 ## Configure
 
 Create a `.env` file with `SLACK_BOT_TOKEN=....` in it. Fill in your bot token.
+Optionally, include `CHANNEL_NAME`, `FROM_DATE`, `TO_DATE` (ISO8601 format).
 
 ## Run
 
